@@ -1,25 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import Card from "./container/Card";
+import "./App.css";
 
-function App() {
+const App = () => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const getTopStories = async () => {
+      const response = await fetch(
+        "https://hacker-news.firebaseio.com/v0/topstories.json"
+      );
+      const topIds = await response.json();
+      const top = topIds.slice(0, 10);
+      const topStories = await Promise.all(
+        top?.map(async (item) => {
+          const resp = await fetch(
+            `https://hacker-news.firebaseio.com/v0/item/${item}.json`
+          );
+          console.log(resp);
+          return await resp.json();
+        })
+      );
+
+      setData(topStories);
+    };
+
+    getTopStories();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Card stories={data} />
+    </>
   );
-}
+};
 
 export default App;
